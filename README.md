@@ -20,7 +20,7 @@ Just run `GetLogicalProcessorInformationEx`. There are no options.
 
 ## Example
 
-See [EXAMPLE.md](EXAMPLE.md)
+See [EXAMPLE.md](EXAMPLE.md), [EXAMPLE-Intel-Core-i5-12600K.md](EXAMPLE-Intel-Core-i5-12600K).
 
 
 ## Copyright Notice and License
