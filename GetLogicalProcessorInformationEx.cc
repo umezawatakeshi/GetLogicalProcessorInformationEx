@@ -66,6 +66,9 @@ int main(void)
 			"Cache",
 			"ProcessorPackage",
 			"Group",
+			"ProcessorDie",
+			"NumaNodeEx",
+			"ProcessorModule",
 		};
 		const char* relationship_str;
 		if (pBuffer->Relationship >= _countof(relationship_list))
@@ -77,7 +80,9 @@ int main(void)
 		switch (pBuffer->Relationship)
 		{
 		case RelationProcessorCore:
-		case RelationProcessorPackage: {
+		case RelationProcessorPackage:
+		case RelationProcessorDie:
+		case RelationProcessorModule: {
 			PROCESSOR_RELATIONSHIP& info = pBuffer->Processor;
 			if (pBuffer->Relationship == RelationProcessorCore)
 			{
@@ -90,10 +95,16 @@ int main(void)
 		}
 			break;
 
-		case RelationNumaNode: {
+		case RelationNumaNode:
+		case RelationNumaNodeEx: {
 			NUMA_NODE_RELATIONSHIP& info = pBuffer->NumaNode;
 			printf(" Node Number = %d\n", info.NodeNumber);
-			print_group_affinity(info.GroupMask);
+			WORD GroupCount = info.GroupCount;
+			if (GroupCount == 0) // This field was introduced in Windows 20H2 and was always 0 on earlier versions.
+				GroupCount = 1;
+			printf(" GroupCount = %d\n", GroupCount);
+			for (int i = 0; i < GroupCount; ++i)
+				print_group_affinity(info.GroupMasks[i]);
 		}
 			break;
 
@@ -118,7 +129,12 @@ int main(void)
 				printf("%d\n", info.Associativity);
 			printf(" Line Size = %dB\n", info.LineSize);
 			printf(" Cache Size = %dKB\n", info.CacheSize / 1024);
-			print_group_affinity(info.GroupMask);
+			WORD GroupCount = info.GroupCount;
+			if (GroupCount == 0) // Unlike NUMA_NODE_RELATIONSHIP::GroupCount, the API document does not explain this field including when it was introduced.
+				GroupCount = 1;
+			printf(" GroupCount = %d\n", GroupCount);
+			for (int i = 0; i < GroupCount; ++i)
+				print_group_affinity(info.GroupMasks[i]);
 		}
 			break;
 
